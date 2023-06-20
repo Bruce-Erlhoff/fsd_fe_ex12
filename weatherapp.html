@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      .container-custom {
+        background-color: cornsilk;
+        padding: 30px;
+        margin-top: 30px;
+      }
+      .col-custom {
+        background-color: antiquewhite;
+        text-align: left;
+        border-color: blue;
+        border-width: 1px;
+        border-style: solid;
+        margin: 2px;
+      }
+      .h5-custom {
+        text-indent: 10px;
+      }
+      .h3-custom {
+        padding-bottom: 5px;
+        color: blue;
+      }
+      #info {
+        display: none;
+      }
+    </style>
+    <script>
+      async function getWeather() {
+        //get the city name from the <input> field
+        // console.log(document.getElementById("cityname").value);
+        let city = document.getElementById("cityname").value;
+        let myurl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=93f26e3c57081a6210de53b8dcfdfea4&units=imperial`;
+
+        //send to server to fetch
+        //fetch returns a response object, then get its json
+        await fetch(myurl)
+          .then((resp) => {
+            return resp.json();
+          })
+          .then(showweather);
+
+        //display it
+        // see https://openweathermap.org/weather-conditions for weather code info
+
+        function showweather(data) {
+          console.log(data);
+          document.getElementById("city").textContent = data.name;
+          document.getElementById("lat").textContent = formatLat(
+            data.coord.lat
+          );
+          document.getElementById("lon").textContent = formatLon(
+            data.coord.lon
+          );
+
+          document.getElementById("low-temp").textContent = formatTemp(
+            data.main.temp_min
+          );
+          document.getElementById("high-temp").textContent = formatTemp(
+            data.main.temp_max
+          );
+          document.getElementById("feelslike").textContent = formatTemp(
+            data.main.feels_like
+          );
+
+          document.getElementById("humidity").textContent = data.main.humidity;
+          document.getElementById("pressure").textContent = data.main.pressure;
+
+          document.getElementById("windspeed").textContent = data.wind.speed;
+          document.getElementById("winddir").textContent = formatWindDir(
+            data.wind.deg
+          );
+
+          document.getElementById("w").textContent = data.weather[0].main;
+          let myimg = data.weather[0].icon + ".png";
+          document.getElementById(
+            "divimg"
+          ).innerHTML = `<img src='http://openweathermap.org/img/w/${myimg}' alt='image' />`;
+
+          document.getElementById("info").style.display = "block";
+        }
+
+        function KtoF(K) {
+          //convert Kelvin to Fahrenheit
+          K = parseInt(K);
+          let F = ((K - 273.15) * 9) / 5 + 32;
+          F = Math.floor(F);
+          return F + " F";
+        }
+        function formatTemp(T) {
+          T = parseInt(T);
+          T = Math.floor(T);
+          return T + "\u00B0 F";
+        }
+        function formatLat(lat) {
+          // lat = parseInt(lat);
+          if (lat < 0) return Math.abs(lat) + "\u00B0 S";
+          else return lat + "\u00B0 N";
+        }
+        function formatLon(lon) {
+          // lon = parseInt(lon);
+          if (lon < 0) return Math.abs(lon) + "\u00B0 W";
+          else return lon + "\u00B0 E";
+        }
+        function formatWindDir(dir) {
+          dir = parseInt(dir);
+          let str = "zzz";
+          switch (true) {
+            case dir > 348.75 && dir <= 11.25:
+              str = "N";
+              break;
+            case dir > 11.25 && dir <= 33.75:
+              str = "NNE";
+              break;
+            case dir > 33.75 && dir <= 56.25:
+              str = "NE";
+              break;
+            case dir > 56.25 && dir <= 78.75:
+              str = "ENE";
+              break;
+            case dir > 78.75 && dir <= 101.25:
+              str = "E";
+              break;
+            case dir > 101.25 && dir <= 123.75:
+              str = "ESE";
+              break;
+            case dir > 123.75 && dir <= 146.25:
+              str = "SE";
+              break;
+            case dir > 146.25 && dir <= 168.75:
+              str = "SSE";
+              break;
+            case dir > 168.75 && dir <= 191.25:
+              str = "S";
+              break;
+            case dir > 191.25 && dir <= 213.75:
+              str = "SSW";
+              break;
+            case dir > 213.75 && dir <= 236.25:
+              str = "SW";
+              break;
+            case dir > 236.25 && dir <= 258.75:
+              str = "WSW";
+              break;
+            case dir > 258.75 && dir <= 281.25:
+              str = "W";
+              break;
+            case dir > 281.25 && dir <= 303.75:
+              str = "WNW";
+              break;
+            case dir > 303.75 && dir <= 326.25:
+              str = "NW";
+              break;
+            case dir > 326.25 && dir <= 348.75:
+              str = "NNW";
+              break;
+            default:
+              str = "xxx";
+          }
+          return str;
+        }
+      }
+    </script>
+
+    <title>Weather Application</title>
+  </head>
+  <body>
+    <div id="mydiv" class="container-fluid">
+      <h1>The Weather App</h1>
+      <input
+        type="text"
+        name="cityname"
+        id="cityname"
+        placeholder="Enter a city"
+      />
+      <button class="btn btn-success" onclick="getWeather()">
+        Get Weather
+      </button>
+
+      <div class="container container-custom" id="info">
+        <div class="row">
+          <div class="col-sm">
+            <h1>
+              Weather for <span id="city">city</span>:
+              <span id="w"> xxx </span> <span id="divimg"></span>
+            </h1>
+          </div>
+          <br />
+          <br />
+        </div>
+
+        <div class="row">
+          <div class="col-sm col-custom">
+            <h3 class="h3-custom">Location</h3>
+            <h6>Latitude: <span id="lat"> xxx</span></h6>
+            <h6>Longitude: <span id="lon"> xxx</span></h6>
+          </div>
+
+          <div class="col-sm col-custom">
+            <h3 class="h3-custom">Temperature</h3>
+            <h6>Low: <span id="low-temp"> xxx</span></h6>
+            <h6>High: <span id="high-temp"> xxx</span></h6>
+            <h6>Feels Like: <span id="feelslike"> xxx</span></h6>
+          </div>
+
+          <div class="col-sm col-custom">
+            <h3 class="h3-custom">Humidity</h3>
+            <h6>Humidity: <span id="humidity"> xxx</span>%</h6>
+
+            <h6>Pressure: <span id="pressure"> xxx</span> millibars</h6>
+          </div>
+          <div class="col-sm col-custom">
+            <h3 class="h3-custom">Wind</h3>
+            <h6>Wind Speed: <span id="windspeed"> xxx</span> mph</h6>
+
+            <h6>Wind Direction: <span id="winddir"> xxx</span></h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
